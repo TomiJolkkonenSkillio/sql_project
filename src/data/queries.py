@@ -82,15 +82,9 @@ def database_design():
             con.close()
 
 def main():
-    database_design() # database degisn queries
-    #randomize_data() # randomized data for realistic distribution
-    #data_consistency() # data consistency (e.g. order_date should be earlier than delivery_date)
-    #populate_100() # populate with at least 100 entries in the Orders, Order-Items, Customers tables
-    #basic_counts_sums() # tot no. of orders, tot sales, products w. low stock
-    #grouping_aggregations() # tot. sales per product category, avr. order value, monthly breakdown of no. of orders and tot. sales
-    #joins_multitablequeries() # list of orders, each order shows cust. name and tot. order value, top 5 customers tot. spending, supplier list w. details
-    #nextedqueries_subqueries() # non-ordered products, customer over x€ spent per order, orders w. biggest quantity
-    #advanced_analyticalqueries() # daily orders trend, peak order days, avr. delivery time per month, % of tot. sales filtered by top 10% of product sales.
+    database_design()
+    # randomize()
+    # analyze()
 
 if __name__ == "__main__":
     main()
