@@ -2,6 +2,7 @@ import psycopg2
 import numpy as np
 import pandas as pd
 from config import config
+from datetime import datetime
 
 '''
     basic_counts_sums() # tot no. of orders, tot sales, products w. low stock
@@ -90,7 +91,7 @@ def grouping_aggregations():
         monthly_breakdown = cursor.fetchmany(10)
         print("Monthly statistics:")
         for row in monthly_breakdown:
-            print(row)
+            print(f"Date: {row[0].date()}, quantity: {row[1]}")
 
         cursor.close()
     except (Exception, psycopg2.DatabaseError) as error:
