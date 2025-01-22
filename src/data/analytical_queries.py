@@ -87,7 +87,7 @@ def grouping_aggregations():
             ORDER BY month;
             """
         )
-        monthly_breakdown = cursor.fetchall()
+        monthly_breakdown = cursor.fetchmany(10)
         print("Monthly statistics:")
         for row in monthly_breakdown:
             print(row)
@@ -115,7 +115,7 @@ def joins_multitablequeries():
             GROUP BY Orders.id, Customers.name;
             """
         )
-        orders_list = cursor.fetchall()
+        orders_list = cursor.fetchmany(10)
         print("List of orders with customer names and total values:")
         for row in orders_list:
             print(row)
@@ -139,7 +139,7 @@ def joins_multitablequeries():
 
         # Supplier list with details
         cursor.execute("SELECT * FROM Suppliers;")
-        suppliers = cursor.fetchall()
+        suppliers = cursor.fetchmany(10)
         print("Supplier list:")
         for supplier in suppliers:
             print(supplier)
@@ -164,7 +164,7 @@ def nestedqueries_subqueries():
             WHERE id NOT IN (SELECT DISTINCT product_id FROM Order_items);
             """
         )
-        non_ordered_products = cursor.fetchall()
+        non_ordered_products = cursor.fetchmany(10)
         print("Products with zero orders:")
         for product in non_ordered_products:
             print(product)
@@ -183,7 +183,7 @@ def nestedqueries_subqueries():
             WHERE total_value > 100;
             """
         )
-        high_spending_customers = cursor.fetchall()
+        high_spending_customers = cursor.fetchmany(10)
         print("Customers with over 100 € per order:")
         for customer in high_spending_customers:
             print(customer)
@@ -224,7 +224,7 @@ def advanced_analyticalqueries():
             ORDER BY order_date;
             """
         )
-        daily_trend = cursor.fetchall()
+        daily_trend = cursor.fetchmany(10)
         print("Trending daily orders:")
         for row in daily_trend:
             print(row)
@@ -254,7 +254,7 @@ def advanced_analyticalqueries():
             ORDER BY month;
             """
         )
-        avg_delivery_time = cursor.fetchall()
+        avg_delivery_time = cursor.fetchmany(10)
         print("Avr delivery time per month:")
         for row in avg_delivery_time:
             print(row)
@@ -263,16 +263,31 @@ def advanced_analyticalqueries():
         cursor.execute(
             """
             WITH ProductSales AS (
-                SELECT product_id, SUM(price_at_purchase * quantity) AS total_sales
+                SELECT
+                    product_id,
+                    SUM(price_at_purchase * quantity) AS total_sales
                 FROM Order_items
                 GROUP BY product_id
+            ),
+            RankedSales AS (
+                SELECT
+                    product_id,
+                    total_sales,
+                    ROW_NUMBER() OVER (ORDER BY total_sales DESC) AS rank,
+                    COUNT(*) OVER () AS total_products
+                FROM ProductSales
+            ),
+            Top10PercentSales AS (
+                SELECT
+                    total_sales
+                FROM RankedSales
+                WHERE rank <= total_products / 10
             )
-            SELECT SUM(total_sales) * 100.0 / (
-                SELECT SUM(total_sales) FROM ProductSales
-            ) AS top_10_percent_sales
-            FROM ProductSales
-            ORDER BY total_sales DESC
-            LIMIT (SELECT COUNT(*) / 10 FROM ProductSales);
+            SELECT
+                SUM(total_sales) * 100.0 / (
+                    SELECT SUM(total_sales) FROM ProductSales
+                ) AS top_10_percent_sales
+            FROM Top10PercentSales;
             """
         )
         top_10_percent_sales = cursor.fetchone()[0]
