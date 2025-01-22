@@ -74,7 +74,7 @@ def randomize_data(num_suppliers, num_customers, num_products, num_orders, num_o
         quantity = random.randint(1, 10)
         price_at_purchase = round(random.uniform(10.0, 500.0), 2)
 
-        ord_items_sql = 'INSER INTO Order_items (order_id, product_id, quantity, price_at_purchase) VALUES (%s, %s, %s, %s)'
+        ord_items_sql = 'INSERT INTO Order_items (order_id, product_id, quantity, price_at_purchase) VALUES (%s, %s, %s, %s);'
         ord_items_data = order_id, product_id, quantity, price_at_purchase
         cursor.execute(ord_items_sql, ord_items_data)
         con.commit()
@@ -87,26 +87,10 @@ def randomize_data(num_suppliers, num_customers, num_products, num_orders, num_o
         delivery_date = fake.date_between(start_date=shipped_date)
         shipping_cost = round(random.uniform(5.0, 50.0), 2)
 
-        ship_sql = 'INSERT INTO Shipments (order_id, shipped_date, delivery_date, shipping_cost) VALUES (%s, %s, %s, %s)'
+        ship_sql = 'INSERT INTO Shipments (order_id, shipped_date, delivery_date, shipping_cost) VALUES (%s, %s, %s, %s);'
         ship_data = order_id, shipped_date, delivery_date, shipping_cost
         cursor.execute(ship_sql, ship_data)
         con.commit()
 
     cursor.close()
     con.close()
-
-def randomize():
-    randomize_data(150, 170, 350, 400, 300, 250)
-    #randomize_suppliers()
-    #randomize_products()
-    #randomize_customers()
-    #randomize_orders()
-    #randomize_order_items()
-    #randomize_shipment()
-
-def main():
-    randomize()
-
-
-if __name__ == "__main__":
-    main()
