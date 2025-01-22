@@ -1,7 +1,7 @@
 import psycopg2
 from config import config
-from analytical_queries import *
-from database_population import *
+#from analytical_queries import *
+#from database_population import *
 
 def database_design():
     con = None

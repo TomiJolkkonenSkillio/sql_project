@@ -14,53 +14,95 @@ from faker import Faker
 
 fake = Faker()
 
-def randomize_suppliers():
-    name = [fake.name() for _ in range(100)]
-    contact_info = [fake.phone_number() for _ in range(100)]
-    country = [fake.country() for _ in range(100)]
-    return name, contact_info, country
+def randomize_data(num_suppliers, num_customers, num_products, num_orders, num_order_items, num_shipments):
+    con = psycopg2.connect(**config())
+    cursor = con.cursor()
 
-def randomize_products():
-    name = [fake.name() for _ in range(total_users)]
-    category = [fake.email() for _ in range(total_users)]
-    price = [fake.date_between(start_date='-25y', end_date='-1y') for _ in range(total_users)]
-    supplier_id = [fake.date_between(start_date='-25y', end_date='-1y') for _ in range(total_users)]
-    stock_quantity = [fake.date_between(start_date='-25y', end_date='-1y') for _ in range(total_users)]
-    return name, category, price, supplier_id, stock_quantity
+    # Suppliers
+    for i in range(num_suppliers):
+        name = fake.company()
+        contact_info = fake.phone_number()
+        country = fake.country()
+    
+        suppliers_sql = 'INSERT INTO Suppliers (name, contact_info, country) VALUES (%s, %s, %s);'
+        suppliers_data = name, contact_info, country
+        cursor.execute(suppliers_sql, suppliers_data)
+        con.commit()
 
-def randomize_customers():
-    name = [fake.name() for _ in range(total_users)]
-    location = [fake.email() for _ in range(total_users)]
-    email = [fake.date_between(start_date='-25y', end_date='-1y') for _ in range(total_users)]
-    return name, location, email
+    # Customers
+    for i in range(num_customers):
+        name = fake.name()
+        location = fake.address().replace("\n", ", ")
+        email = fake.email()
 
-def randomize_orders():
-    customer_id = [fake.name() for _ in range(total_users)]
-    order_date = [fake.email() for _ in range(total_users)]
-    order_status = [fake.date_between(start_date='-25y', end_date='-1y') for _ in range(total_users)]
-    return customer_id, order_date, order_status
+        cust_sql = 'INSERT INTO Customers (name, location, email) VALUES (%s, %s, %s);'
+        cust_data = name, location, email
+        cursor.execute(cust_sql, cust_data)
+        con.commit()
 
-def randomize_order_items():
-    order_id = [fake.name() for _ in range(total_users)]
-    product_id = [fake.email() for _ in range(total_users)]
-    quantity = [fake.date_between(start_date='-25y', end_date='-1y') for _ in range(total_users)]
-    price_at_purchase = [fake.date_between(start_date='-25y', end_date='-1y') for _ in range(total_users)]
-    return order_id, product_id, quantity, price_at_purchase
+    # Products
+    for i in range(num_products):
+        name = fake.word()
+        category = random.choice(['Clothes', 'Hardware', 'Cleaning supplies', 'Bags', 'Hats', 'Shoes'])
+        price = round(random.uniform(10.0, 500.0), 2)
+        supplier_id = random.randint(1, num_suppliers)
+        stock_quantity = random.randint(1, 1000)
 
-def randomize_shipment():
-    order_id = [fake.name() for _ in range(total_users)]
-    shipped_date = [fake.email() for _ in range(total_users)]
-    delivery_date = [fake.date_between(start_date='-25y', end_date='-1y') for _ in range(total_users)]
-    shipping_cost = [fake.date_between(start_date='-25y', end_date='-1y') for _ in range(total_users)]
-    return order_id, shipped_date, delivery_date, shipping_cost
+        prod_sql = 'INSERT INTO Products (name, category, price, supplier_id, stock_quantity) VALUES (%s, %s, %s, %s, %s);'
+        prod_data = name, category, price, supplier_id, stock_quantity
+        cursor.execute(prod_sql, prod_data)
+        con.commit()
+
+    # Orders
+    order_dates = []
+    for i in range(num_orders):
+        customer_id = random.randint(1, num_customers)
+        order_date = fake.date_between(start_date='-5y', end_date='today')
+        order_status = random.choice(['ordered', 'fulfilled', 'delivered'])
+
+        orders_sql = 'INSERT INTO Orders (customer_id, order_date, order_status) VALUES (%s, %s, %s);'
+        orders_data = customer_id, order_date, order_status
+        cursor.execute(orders_sql, orders_data)
+        con.commit()
+
+        order_dates.append(order_date)
+
+    # Order_items
+    for i in range(num_order_items):
+        order_id = random.randint(1, num_orders)
+        product_id = random.randint(1, num_products)
+        quantity = random.randint(1, 10)
+        price_at_purchase = round(random.uniform(10.0, 500.0), 2)
+
+        ord_items_sql = 'INSER INTO Order_items (order_id, product_id, quantity, price_at_purchase) VALUES (%s, %s, %s, %s)'
+        ord_items_data = order_id, product_id, quantity, price_at_purchase
+        cursor.execute(ord_items_sql, ord_items_data)
+        con.commit()
+
+    # Shipments
+    for i in range(num_shipments):
+        order_id = random.randint(1, num_orders)
+        order_date = order_dates[order_id - 1] # Get the order_date for this order from the list
+        shipped_date = fake.date_between(start_date=order_date)
+        delivery_date = fake.date_between(start_date=shipped_date)
+        shipping_cost = round(random.uniform(5.0, 50.0), 2)
+
+        ship_sql = 'INSERT INTO Shipments (order_id, shipped_date, delivery_date, shipping_cost) VALUES (%s, %s, %s, %s)'
+        ship_data = order_id, shipped_date, delivery_date, shipping_cost
+        cursor.execute(ship_sql, ship_data)
+        con.commit()
+
+    cursor.close()
+    con.close()
 
 def randomize():
-    randomize_suppliers()
-    randomize_products()
-    randomize_customers()
-    randomize_orders()
-    randomize_order_items()
-    randomize_shipment()
+    randomize_data(150, 170, 350, 400, 300, 250)
+    #randomize_suppliers()
+    #randomize_products()
+    #randomize_customers()
+    #randomize_orders()
+    #randomize_order_items()
+    #randomize_shipment()
 
 def main():
     randomize()
