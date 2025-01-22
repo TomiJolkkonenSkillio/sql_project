@@ -1,7 +1,8 @@
 import psycopg2
 from config import config
+from database_population import randomize_data
 #from analytical_queries import *
-#from database_population import *
+
 
 def database_design():
     con = None
@@ -83,7 +84,7 @@ def database_design():
 
 def main():
     database_design()
-    # randomize()
+    randomize_data(150, 170, 350, 400, 300, 250)
     # analyze()
 
 if __name__ == "__main__":
