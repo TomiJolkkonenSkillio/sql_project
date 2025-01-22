@@ -2,6 +2,7 @@ import psycopg2
 import numpy as np
 import pandas as pd
 from config import config
+from datetime import datetime
 
 '''
     basic_counts_sums() # tot no. of orders, tot sales, products w. low stock
@@ -73,7 +74,7 @@ def grouping_aggregations():
             """
         )
         average_order_value = cursor.fetchone()[0]
-        print(f"Avr order €: {average_order_value}")
+        print(f"Avr order €: {round(average_order_value, 2)}")
 
         # Monthly statistics of no. of orders and tot sales
         cursor.execute(
@@ -90,7 +91,7 @@ def grouping_aggregations():
         monthly_breakdown = cursor.fetchmany(10)
         print("Monthly statistics:")
         for row in monthly_breakdown:
-            print(row)
+            print(f"Date: {row[0].date()}, no. of orders: {row[1]}, total sales: {row[2]}")
 
         cursor.close()
     except (Exception, psycopg2.DatabaseError) as error:
@@ -227,7 +228,7 @@ def advanced_analyticalqueries():
         daily_trend = cursor.fetchmany(10)
         print("Trending daily orders:")
         for row in daily_trend:
-            print(row)
+            print(f"Date: {row[0]}, no. of orders: {row[1]}")
 
         # Peak order days
         cursor.execute(
@@ -242,7 +243,7 @@ def advanced_analyticalqueries():
         peak_days = cursor.fetchall()
         print("Peak order days:")
         for day in peak_days:
-            print(day)
+            print(f"Date: {row[0]}, quantity: {row[1]}")
 
         # Average delivery time per month
         cursor.execute(
@@ -257,7 +258,7 @@ def advanced_analyticalqueries():
         avg_delivery_time = cursor.fetchmany(10)
         print("Avr delivery time per month:")
         for row in avg_delivery_time:
-            print(row)
+            print(f"Date: {row[0].date()}, avg delivery time: {round(row[1], 2)}")
 
         # Percentage of total sales by top 10% of product sales
         cursor.execute(
@@ -291,7 +292,7 @@ def advanced_analyticalqueries():
             """
         )
         top_10_percent_sales = cursor.fetchone()[0]
-        print(f"% of tot sales by top 10%% products: {top_10_percent_sales}%")
+        print(f"% of tot sales by top 10%% products: {round(top_10_percent_sales, 2)}%")
 
         cursor.close()
     except (Exception, psycopg2.DatabaseError) as error:

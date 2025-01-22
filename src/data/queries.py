@@ -2,6 +2,7 @@ import psycopg2
 from config import config
 from database_population import randomize_data
 from analytical_queries import *
+from datetime import datetime
 
 
 def database_design():
