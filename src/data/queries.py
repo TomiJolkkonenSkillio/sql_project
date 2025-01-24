@@ -85,7 +85,7 @@ def database_design():
 
 def main():
     #database_design()
-    #randomize_data(150, 170, 350, 400, 300, 250)
+    randomize_data()
     analyze()
 
 if __name__ == "__main__":
